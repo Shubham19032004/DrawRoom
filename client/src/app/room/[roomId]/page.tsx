@@ -3,10 +3,11 @@ import ChatBox from "@/components/ChatBox";
 //@ts-ignore
 import ShareUrl from "@/components/ShareUrl";
 import { useDraw } from "@/hooks/useDraw";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 import { io } from "socket.io-client";
+import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 type DrawLineProps = {
   prevPoint: Point | null;
@@ -17,25 +18,38 @@ type DrawLineProps = {
 export default function Page<pageProps>({}) {
   const { canvasRef, onMouseDown, clear } = useDraw(createLine);
   const [color, setColor] = useState<string>("#000");
-  const router = useRouter();
+  const [canvasWidth, setCanvasWidth] = useState<number>(0);
+  const [canvasHeight, setCanvasHeight] = useState<number>(0);
+  const params = useParams<{ tag: string; roomId: string }>();
+  const searchParams = useSearchParams();
+  const [roomID, setRoomID] = useState('');
+  const [name, setName] = useState('');
 
-  const id = window.location.pathname;
-  const roomID: string = id.split("/")[2];
-  const name=window.location.search.split("=")[1]
-  console.log(name)
+  useEffect(() => {
+    const id = params.roomId;
+    console.log("Room ID from params:", id);
+    setRoomID(id);
+    const nameParam = searchParams.get('query');
+    console.log("Name from searchParams:", nameParam);
+    setName(nameParam || '');
+  }, [params, searchParams]);
+
+  useEffect(() => {
+    setCanvasWidth(window.innerWidth);
+    setCanvasHeight(window.innerHeight);
+  }, []);
+
   const socket = io(`http://localhost:3001/`, {
     query: {
       roomID: roomID,
-      name:name
+      name: name
     },
   });
 
-  // useEffect(()=>{window.location.reload();},[1])
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
 
     socket.emit("client-ready");
-
 
     socket.on("get-canvas-state", () => {
       if (!canvasRef.current?.toDataURL()) return;
@@ -44,7 +58,7 @@ export default function Page<pageProps>({}) {
     });
 
     socket.on("canvas-state-from-server", (state: string) => {
-      console.log("I received the state");
+      console.log("Received canvas state from server");
       const img = new Image();
       img.src = state;
       img.onload = () => {
@@ -68,7 +82,7 @@ export default function Page<pageProps>({}) {
       socket.off("canvas-state-from-server");
       socket.off("clear");
     };
-  }, [canvasRef]);
+  }, [canvasRef, socket, clear]);
 
   function createLine({ prevPoint, currentPoint, ctx }: Draw) {
     socket.emit("draw-line", { prevPoint, currentPoint, color });
@@ -96,7 +110,7 @@ export default function Page<pageProps>({}) {
 
   return (
     <div className="w-screen h-screen bg-white flex justify-center">
-      <div className="flex h-[5rem]  justify-between gap-[20rem] mt-[2rem]">
+      <div className="flex h-[5rem] justify-between gap-[20rem] mt-[2rem]">
         <ChromePicker
           className="h-[4rem] z-10"
           color={color}
@@ -108,7 +122,7 @@ export default function Page<pageProps>({}) {
             clear();
             socket.emit("clear");
           }}
-          className="text-xl font-bold ] bg-indigo-500 text-white w-[7rem] h-[3rem] z-40 rounded-md"
+          className="text-xl font-bold bg-indigo-500 text-white w-[7rem] h-[3rem] z-40 rounded-md"
         >
           clear canvas
         </button>
@@ -118,12 +132,12 @@ export default function Page<pageProps>({}) {
       <canvas
         onMouseDown={onMouseDown}
         ref={canvasRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={canvasWidth}
+        height={canvasHeight}
         className="absolute z-1"
       />
-    {/* @ts-ignore */}
-      <ChatBox socket={socket}/>
+      {/* @ts-ignore */}
+      <ChatBox socket={socket} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ const io = new Server(server, {
 io.on('connection', async (socket) => {
   const id = await socket.handshake.query.roomID;
   const name = await socket.handshake.query.name; 
+  console.log(id,name)
   if (id) {
     socket.join(id);
     socket.on('client-ready', () => {

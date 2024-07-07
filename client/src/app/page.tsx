@@ -8,9 +8,9 @@ export default function Home({}) {
   const [invite, setInvite] = useState("");
   const router = useRouter();
   function joinRoom(){
+
     if(name && invite){
       router.push(`/room/${invite}?query=${name}`);
-      window.location.reload();
     }
   }
   const handleCreateRoom = () => {
@@ -19,7 +19,7 @@ export default function Home({}) {
       router.push(`/room/${id}?query=${name}`);
     }
   };
-  console.log(name);
+
   return (
     <div className="w-screen h-screen flex flex-col  items-center pt-[15%] bg-black ">
       <input
