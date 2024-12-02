@@ -11,9 +11,11 @@ Draw Room is a multi-user drawing application that allows more than two people t
 * User-Friendly Interface: Intuitive and easy-to-use interface for both drawing and chatting.
 
 # Clone the repository:
+
 ```bash
 https://github.com/Shubham19032004/DrawRoom.git
 ```
+
 
 ![image](https://github.com/Shubham19032004/DrawRoom/assets/118589955/7490887c-ca4f-49a2-b636-006042d9adaf)
 
