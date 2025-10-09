@@ -20,7 +20,6 @@ io.on('connection', async (socket) => {
     socket.on('client-ready', () => {
       socket.to(id).emit('get-canvas-state');
     });
-
     socket.on('canvas-state', (state) => {
       socket.to(id).emit('canvas-state-from-server', state);
     });
