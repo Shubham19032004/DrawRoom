@@ -28,7 +28,6 @@ export const useDraw = (onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
       onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
       prevPoint.current = currentPoint;
     };
-
     const computePointInCanvas = (e: MouseEvent) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
